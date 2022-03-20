@@ -1,8 +1,11 @@
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,17 +15,46 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.ArrayList;
 
 public class UnixClone {
 
     public static void main(String[] args) throws Exception {
         //cpDir("./testDir", "./testDir2");
         //touch("newfile.txt");
-        lsa();
+        //lsa();
+
+        if (args[0].equals("lsa")) {
+            lsa();
+        }
+        else if (args[0].equals("cp")) {
+            cp(args[1], args[2]);
+        }
+        else if (args[0].equals("cpDir")) {
+            cpDir(args[1], args[2]);
+        }
+        else if (args[0].equals("touch")) {
+            touch(args[1]);
+        }
+        else if (args[0].equals("rm")) {
+            rm(args[1]);
+        }
+        else if (args[0].equals("ls")) {
+            ls();
+        }
+        else if (args[0].equals("rmRf")) {
+            rmRf(args[1]);
+        }
+        else if (args[0].equals("mv")) {
+            mv(args[1], args[2]);
+        }
+        else if (args[0].equals("cat")) {
+            cat(args[1]);
+        }
     }
 
-    public static void cp(String copyFrom, String copyTo) throws IOException {
-        System.out.println(copyFrom + " " + copyTo);
+    public static boolean cp(String copyFrom, String copyTo) throws IOException {
+        //System.out.println(copyFrom + " " + copyTo);
         File original = new File(copyFrom);
         File copied = new File(copyTo);
         try {
@@ -37,6 +69,13 @@ public class UnixClone {
             }
         }
         finally{};
+
+        if (copied.exists()) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
     public static void cpDir(String copyFrom, String copyTo) throws IOException {
@@ -79,6 +118,62 @@ public class UnixClone {
 
                 System.out.println(fileArr[i].getName() + "\t" + owner.getName() + "\t" + attr.lastModifiedTime());
             }
+        }
+    }
+
+    public static void ls() throws Exception {
+        File[] fileArr = listFiles(System.getProperty("user.dir"));
+
+        for (File file : fileArr) {
+            System.out.println(file.getName());
+        }
+    }
+
+    private static File[] listFiles(String path) throws Exception {
+        File dir = new File(path);
+
+        return dir.listFiles();
+    }
+
+    public static void rm (String path) throws Exception {
+        File file = new File(path);
+
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public static void rmRf (String path) throws Exception {
+        File[] fileArr = listFiles(path);
+
+        for (File file : fileArr) {
+            if (file.isDirectory()) {
+                rmRf(file.getAbsolutePath());
+            }
+    
+            file.delete();        
+        }
+
+        File file = new File(path);
+        file.delete();
+    }
+
+    public static void mv (String moveFrom, String moveTo) throws Exception {
+        if (cp(moveFrom, moveTo)) {
+            rm(moveFrom);
+        }
+        else {
+            System.out.println("failed to copy file");
+        }
+
+    } 
+
+    public static void cat (String path) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(path));
+        String line = null;
+
+        while((line = br.readLine()) != null) {
+            System.out.println(line);
         }
     }
 }
