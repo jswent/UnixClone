@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UnixClone {
 
@@ -50,6 +51,12 @@ public class UnixClone {
         }
         else if (args[0].equals("cat")) {
             cat(args[1]);
+        }
+        else if (args[0].equals("wc")) {
+            wc(args[1]);
+        }
+        else if (args[0].equals("diff")) {
+            diff(args[1], args[2]);
         }
     }
 
@@ -175,5 +182,83 @@ public class UnixClone {
         while((line = br.readLine()) != null) {
             System.out.println(line);
         }
+    }
+
+    public static void wc (String path) throws Exception {
+        File file = new File(path);
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String line = "";
+        int count = 0;
+
+        while((line = br.readLine()) != null) {
+            String[] split = line.split(" ");
+            count += split.length;
+        }
+
+        System.out.println(count);
+        wcl(path);
+        wcc(path);
+    }
+
+    public static void wcl (String path) throws Exception {
+        File file = new File(path);
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String line = "";
+        int count = 0;
+
+        while ((line = br.readLine()) != null) {
+            count += 1;
+        }
+
+        System.out.println(count);
+    }
+
+    // public static int wcl (String path) throws Exception {
+
+    // }
+
+    public static void wcc (String path) throws Exception {
+        File file = new File(path);
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String line = "";
+        int count = 0;
+
+        System.out.println(Files.size(Paths.get(path)));
+    }
+
+    public static void diff (String path1, String path2) throws Exception {
+        File file1 = new File(path1);
+        File file2 = new File(path2);
+
+        BufferedReader br1 = new BufferedReader(new FileReader(file1));
+        BufferedReader br2 = new BufferedReader(new FileReader(file2));
+
+        String line1 = "", line2 = "";
+        List<String> list1 = new ArrayList<>();
+        List<String> list2 = new ArrayList<>();
+
+        while (((line1 = br1.readLine()) != null) || ((line2 = br2.readLine()) != null)) {
+            if (!line1.equals(line2)) {
+                list1.add(line1);
+                list2.add(line2);
+            }
+        }
+
+        
+
+        for (String s : list1) {
+            System.out.println("< " + s);
+        }
+        System.out.println("---");
+        for (String s : list2) {
+            System.out.println("> " + s);
+        }
+
     }
 }
